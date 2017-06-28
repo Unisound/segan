@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # DOWNLOAD THE DATASET
+
 mkdir -p data
 pushd data
 if [ ! -d clean_trainset_wav_16k ]; then
@@ -44,6 +45,7 @@ if [ ! -d noisy_trainset_wav_16k ]; then
     fi
 fi
 popd
+
 
 
 echo 'PREPARING TRAINING DATA...'

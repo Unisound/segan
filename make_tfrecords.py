@@ -54,15 +54,19 @@ def encoder_proc(wav_filename, noisy_path, out_file, wav_canvas_size):
     noisy_filename = os.path.join(noisy_path, wav_fullname)
     wav_signals = read_and_slice(wav_filename, wav_canvas_size)
     noisy_signals = read_and_slice(noisy_filename, wav_canvas_size)
+    #print('shape: {}'.format(wav_signals.shape))
+    #print('shape_noisy: {}'.format(noisy_signals.shape))
     assert wav_signals.shape == noisy_signals.shape, noisy_signals.shape
-
-    for (wav, noisy) in zip(wav_signals, noisy_signals):
-        wav_raw = wav.tostring()
-        noisy_raw = noisy.tostring()
-        example = tf.train.Example(features=tf.train.Features(feature={
+    if wav_signals.shape == noisy_signals.shape:
+        for (wav, noisy) in zip(wav_signals, noisy_signals):
+           wav_raw = wav.tostring()
+           noisy_raw = noisy.tostring()
+           example = tf.train.Example(features=tf.train.Features(feature={
             'wav_raw': _bytes_feature(wav_raw),
             'noisy_raw': _bytes_feature(noisy_raw)}))
-        out_file.write(example.SerializeToString())
+           out_file.write(example.SerializeToString())
+    if wav_signals.shape != noisy_signals.shape:
+        print('{}'.format(wav_filename))
 
 def main(opts):
     if not os.path.exists(opts.save_path):
