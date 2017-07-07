@@ -55,6 +55,7 @@ flags.DEFINE_string("e2e_dataset", "data/segan.tfrecords", "TFRecords"
                                                           "segan.tfrecords.")
 flags.DEFINE_string("save_clean_path", "test_clean_results", "Path to save clean utts")
 flags.DEFINE_string("test_wav", None, "name of test wav (it won't train)")
+flags.DEFINE_string("test_wav_list",None,"name of test wav (it won't train)")
 flags.DEFINE_string("weights", None, "Weights file")
 FLAGS = flags.FLAGS
 
@@ -99,21 +100,26 @@ def main(_):
                 raise ValueError('weights must be specified!')
             print('Loading model weights...')
             se_model.load(FLAGS.save_path, FLAGS.weights)
-            fm, wav_data = wavfile.read(FLAGS.test_wav)
-            wavname = FLAGS.test_wav.split('/')[-1]
-            if fm != 16000:
-                raise ValueError('16kHz required! Test file is different')
-            wave = (2./65535.) * (wav_data.astype(np.float32) - 32767) + 1.
-            if FLAGS.preemph  > 0:
-                print('preemph test wave with {}'.format(FLAGS.preemph))
-                x_pholder, preemph_op = pre_emph_test(FLAGS.preemph, wave.shape[0])
-                wave = sess.run(preemph_op, feed_dict={x_pholder:wave})
-            print('test wave shape: ', wave.shape)
-            print('test wave min:{}  max:{}'.format(np.min(wave), np.max(wave)))
-            c_wave = se_model.clean(wave)
-            print('c wave min:{}  max:{}'.format(np.min(c_wave), np.max(c_wave)))
-            wavfile.write(os.path.join(FLAGS.save_clean_path, wavname), 16e3, c_wave)
-            print('Done cleaning {} and saved '
+            test_wav_list_path=os.path.join(FLAGS.test_wav,FLAGS.test_wav_list)
+            print('path: {}',test_wav_list_path)
+            f=open(test_wav_list_path,'r')
+            for line in f.readlines():
+                line=line.strip()
+                fm, wav_data = wavfile.read(os.path.join(FLAGS.test_wav,line))
+                wavname = line
+                if fm != 16000:
+                    raise ValueError('16kHz required! Test file is different')
+                wave = (2./65535.) * (wav_data.astype(np.float32) - 32767) + 1.
+                if FLAGS.preemph  > 0:
+                    print('preemph test wave with {}'.format(FLAGS.preemph))
+                    x_pholder, preemph_op = pre_emph_test(FLAGS.preemph, wave.shape[0])
+                    wave = sess.run(preemph_op, feed_dict={x_pholder:wave})
+                print('test wave shape: ', wave.shape)
+                print('test wave min:{}  max:{}'.format(np.min(wave), np.max(wave)))
+                c_wave = se_model.clean(wave)
+                print('c wave min:{}  max:{}'.format(np.min(c_wave), np.max(c_wave)))
+                wavfile.write(os.path.join(FLAGS.save_clean_path, wavname), 16e3, c_wave)
+                print('Done cleaning {} and saved '
                   'to {}'.format(FLAGS.test_wav,
                                  os.path.join(FLAGS.save_clean_path, wavname)))
 

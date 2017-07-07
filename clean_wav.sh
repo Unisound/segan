@@ -19,8 +19,8 @@ echo "INPUT NOISY WAV: $NOISY_WAVNAME"
 echo "SAVE PATH: $SAVE_PATH"
 mkdir -p $SAVE_PATH
 
-python main.py --init_noise_std 0. --save_path segan_v1.1 \
-               --batch_size 100 --g_nl prelu --weights SEGAN-41700 \
-               --preemph 0.95 --bias_deconv True \
-               --bias_downconv True --bias_D_conv True \
-               --test_wav $NOISY_WAVNAME --save_clean_path $SAVE_PATH
+CUDA_VISIBLE_DEVICES="0" python main.py --init_noise_std 0. --save_path segan_cctv_and_tts \
+                                          --batch_size 32 --g_nl prelu --weights SEGAN-161508 \
+                                          --preemph 0.95 --bias_deconv True \
+                                          --bias_downconv True --bias_D_conv True \
+                                          --test_wav $NOISY_WAVNAME --save_clean_path $SAVE_PATH --test_wav_list list.txt
